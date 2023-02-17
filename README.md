@@ -10,7 +10,7 @@ Build
 docker build . -t n8n-cloudsql
 ```
 
-Run
+Running locally
 ```
-docker run --rm -p 5678:5678 --name=n8n-cloudsql n8n-cloudsql --rm
+docker run -it --rm --name=n8n-cloudsql -p 5678:5678 -e DB_POSTGRESDB_USER=postgres -e DB_POSTGRESDB_PASSWORD=postgres n8n-cloudsql n8n start
 ```

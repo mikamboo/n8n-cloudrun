@@ -4,25 +4,27 @@
 # Setup GCP SQL Proxy
 # CONN_NAME="${GOOGLE_PROJECT}:${REGION}:${DB_INSTANCE}"
 
-echo "Starting SQL proxy..."
-/cloud_sql_proxy -instances=${CLOUDSQL_CONNECTION_NAME}=tcp:5432 &
-
-echo "Waiting for proxy to start..."
-sleep 20
+if [ -n "$USE_CLOUD_SQL_PROXY" ]; then
+    echo "Starting SQL proxy..."
+    /cloud_sql_proxy -instances=${CLOUDSQL_CONNECTION_NAME}=tcp:5432 &
+    
+    echo "Waiting for proxy to start..."
+    sleep 20
+fi
 
 echo "Starting n8n"
 if [ -d /root/.n8n ] ; then
-  chmod o+rx /root
-  chown -R node /root/.n8n
-  ln -s /root/.n8n /home/node/
+    chmod o+rx /root
+    chown -R node /root/.n8n
+    ln -s /root/.n8n /home/node/
 fi
 
 chown -R node /home/node
 
 if [ "$#" -gt 0 ]; then
-  # Got started with arguments
-  exec su-exec node "$@"
+    # Got started with arguments
+    exec su-exec node "$@"
 else
-  # Got started without arguments
-  exec su-exec node n8n
+    # Got started without arguments
+    exec su-exec node n8n
 fi
