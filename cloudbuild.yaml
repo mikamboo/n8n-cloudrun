@@ -2,38 +2,38 @@ steps:
   - name: gcr.io/cloud-builders/docker
     args:
       - build
-      - '--no-cache'
-      - '-t'
-      - '$_GCR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA'
+      - "--no-cache"
+      - "-t"
+      - "$_GCR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA"
       - .
-      - '-f'
-      - docker/images/n8n-cloudsql/Dockerfile
-      - '--build-arg'
+      - "-f"
+      - Dockerfile
+      - "--build-arg"
       - N8N_VERSION=$_RELEASE_VERSION
     id: Build
   - name: gcr.io/cloud-builders/docker
     args:
       - push
-      - '$_GCR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA'
+      - "$_GCR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA"
     id: Push
-  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
+  - name: "gcr.io/google.com/cloudsdktool/cloud-sdk:slim"
     args:
       - run
       - services
       - update
       - $_SERVICE_NAME
-      - '--platform=managed'
-      - '--image=$_GCR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA'
-      - '--set-env-vars=DB_TYPE=postgresdb,N8N_PROTOCOL=https,N8N_HOST=$_INSTANCE_HOST,WEBHOOK_URL=https://$_INSTANCE_HOST,NODE_ENV=production,N8N_LOG_LEVEL=info,EXECUTIONS_PROCESS=main,GENERIC_TIMEZONE=UTC,N8N_SKIP_WEBHOOK_DEREGISTRATION_SHUTDOWN=true'
-      - '--set-secrets=DB_POSTGRESDB_PASSWORD=CLOUDSQL_PASSWORD:latest,DB_POSTGRESDB_USER=CLOUDSQL_USERNAME:latest,CLOUDSQL_CONNECTION_NAME=CLOUDSQL_CONNECTION_NAME:latest,N8N_ENCRYPTION_KEY=N8N_ENCRYPTION_KEY:latest'
+      - "--platform=managed"
+      - "--image=$_GCR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA"
+      - "--set-env-vars=DB_TYPE=postgresdb,N8N_PROTOCOL=https,N8N_HOST=$_INSTANCE_HOST,WEBHOOK_URL=https://$_INSTANCE_HOST,NODE_ENV=production,N8N_LOG_LEVEL=info,EXECUTIONS_PROCESS=main,GENERIC_TIMEZONE=UTC,N8N_SKIP_WEBHOOK_DEREGISTRATION_SHUTDOWN=true"
+      - "--set-secrets=DB_POSTGRESDB_PASSWORD=CLOUDSQL_PASSWORD:latest,DB_POSTGRESDB_USER=CLOUDSQL_USERNAME:latest,CLOUDSQL_CONNECTION_NAME=CLOUDSQL_CONNECTION_NAME:latest,N8N_ENCRYPTION_KEY=N8N_ENCRYPTION_KEY:latest"
       - >-
         --labels=managed-by=gcp-cloud-build-deploy-cloud-run,commit-sha=$COMMIT_SHA,gcb-build-id=$BUILD_ID,gcb-trigger-id=$_TRIGGER_ID,$_LABELS
-      - '--region=$_DEPLOY_REGION'
-      - '--quiet'
+      - "--region=$_DEPLOY_REGION"
+      - "--quiet"
     id: Deploy
     entrypoint: gcloud
 images:
-  - '$_GCR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA'
+  - "$_GCR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA"
 options:
   substitutionOption: ALLOW_LOOSE
 substitutions:
