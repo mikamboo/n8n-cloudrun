@@ -1,4 +1,4 @@
-FROM n8nio/n8n:0.212.0
+FROM n8nio/n8n:0.216.0
 
 # Download proxy
 RUN wget "https://storage.googleapis.com/cloudsql-proxy/v1.33.2/cloud_sql_proxy.linux.amd64" -O /cloud_sql_proxy
