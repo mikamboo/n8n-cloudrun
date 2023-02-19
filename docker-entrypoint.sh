@@ -9,7 +9,7 @@ if [ -n "$USE_CLOUD_SQL_PROXY" ]; then
     /cloud_sql_proxy -instances=${CLOUDSQL_CONNECTION_NAME}=tcp:5432 &
     
     echo "Waiting for proxy to start..."
-    sleep 10
+    while ! nc -z 127.0.0.1 5432; do sleep 1; done;
 fi
 
 echo "Starting n8n"
