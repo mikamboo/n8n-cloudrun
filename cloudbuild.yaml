@@ -54,7 +54,7 @@ tags:
 
 # serviceAccount: 'projects/$PROJECT_ID/serviceAccounts/$_SERVICE_ACCOUNT'
 
-# options:
-#   # Fix: build tries to store the logs in gcloud storage, insufficient the permissions.
-#   logging: CLOUD_LOGGING_ONLY
-#   automapSubstitutions: true
+options:
+  # Fix: build tries to store the logs in gcloud storage, insufficient the permissions.
+  logging: CLOUD_LOGGING_ONLY
+  automapSubstitutions: true
