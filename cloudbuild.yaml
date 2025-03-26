@@ -1,49 +1,61 @@
+# Doc: https://cloud.google.com/build/docs/build-config-file-schema?hl=fr#build_steps
+
 steps:
-  - name: gcr.io/cloud-builders/docker
-    args:
-      - build
-      - "--no-cache"
-      - "-t"
-      - "$_GCR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA"
-      - .
-      - "-f"
-      - Dockerfile
-      - "--build-arg"
-      - N8N_VERSION=$_RELEASE_VERSION
-    id: Build
-  - name: gcr.io/cloud-builders/docker
-    args:
-      - push
-      - "$_GCR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA"
-    id: Push
-  - name: "gcr.io/google.com/cloudsdktool/cloud-sdk:slim"
-    args:
-      - run
-      - services
-      - update
-      - $_SERVICE_NAME
-      - "--platform=managed"
-      - "--image=$_GCR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA"
-      - "--set-env-vars=DB_TYPE=postgresdb,N8N_PROTOCOL=https,N8N_HOST=$_INSTANCE_HOST,N8N_EDITOR_BASE_URL=https://$_INSTANCE_HOST,WEBHOOK_URL=https://$_INSTANCE_HOST,NODE_ENV=production,N8N_LOG_LEVEL=debug,EXECUTIONS_PROCESS=main,GENERIC_TIMEZONE=UTC,N8N_SKIP_WEBHOOK_DEREGISTRATION_SHUTDOWN=true,USE_CLOUD_SQL_PROXY=true,N8N_DIAGNOSTICS_ENABLED=false,EXECUTIONS_DATA_PRUNE=true,N8N_SENTRY_DSN=,N8N_DIAGNOSTICS_ENABLED=false"
-      - "--set-secrets=DB_POSTGRESDB_PASSWORD=CLOUDSQL_PASSWORD:latest,DB_POSTGRESDB_USER=CLOUDSQL_USERNAME:latest,CLOUDSQL_CONNECTION_NAME=CLOUDSQL_CONNECTION_NAME:latest,N8N_ENCRYPTION_KEY=N8N_ENCRYPTION_KEY:latest"
-      - >-
-        --labels=managed-by=gcp-cloud-build-deploy-cloud-run,commit-sha=$COMMIT_SHA,gcb-build-id=$BUILD_ID,gcb-trigger-id=$_TRIGGER_ID,$_LABELS
-      - "--region=$_DEPLOY_REGION"
-      - "--quiet"
-    id: Deploy
-    entrypoint: gcloud
+# Build the container image
+- name: 'gcr.io/cloud-builders/docker'
+  args: [
+    'build', 
+    '--no-cache',
+    '-t', 
+    '$_AR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_SERVICE_NAME', 
+    '.',
+    '-f',
+    'Dockerfile'
+  ]
+
+# Push the container image to Registry
+- name: 'gcr.io/cloud-builders/docker'
+  args: [
+    'push', 
+    '$_AR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_SERVICE_NAME'
+  ]
+
+# Deploy container image to Cloud Run
+- name: 'gcr.io/cloud-builders/gcloud'
+  args: [
+    'run', 'deploy', '$_SERVICE_NAME', 
+    '--image', '$_AR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_SERVICE_NAME', 
+    '--region', '$_SERVICE_REGION', 
+    '--platform', 'managed', 
+    '--port', '$_SERVICE_PORT', 
+    '--min-instances', '0',
+    '--max-instances', '1',
+    '--allow-unauthenticated',
+    '--set-env-vars=DB_TYPE=postgresdb,N8N_PROTOCOL=https,N8N_HOST=$_INSTANCE_HOST,N8N_EDITOR_BASE_URL=https://$_INSTANCE_HOST,WEBHOOK_URL=https://$_INSTANCE_HOST,NODE_ENV=production,N8N_LOG_LEVEL=debug,EXECUTIONS_PROCESS=main,GENERIC_TIMEZONE=UTC,N8N_SKIP_WEBHOOK_DEREGISTRATION_SHUTDOWN=true,N8N_DIAGNOSTICS_ENABLED=false',
+    '--set-secrets=DB_POSTGRESDB_HOST=N8N_DB_POSTGRESDB_HOST:latest,DB_POSTGRESDB_DATABASE=N8N_DB_POSTGRESDB_DATABASE:latest,DB_POSTGRESDB_USER=N8N_POSTGRES_NON_ROOT_USER:latest,DB_POSTGRESDB_PASSWORD=N8N_POSTGRES_NON_ROOT_PASSWORD:latest,N8N_ENCRYPTION_KEY=N8N_ENCRYPTION_KEY:latest',
+    '--labels=managed-by=gcp-cloud-build-deploy-cloud-run,commit-sha=$COMMIT_SHA,gcb-build-id=$BUILD_ID,gcb-trigger-id=$_TRIGGER_ID,$_LABELS'
+  ]
+
 images:
-  - "$_GCR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA"
-options:
-  substitutionOption: ALLOW_LOOSE
+- '$_AR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_SERVICE_NAME'
+
 substitutions:
-  _PLATFORM: managed
-  _SERVICE_NAME: n8n
-  _DEPLOY_REGION: europe-west2
-  _LABELS: gcb-trigger-id=6f0ea908-2f26-4637-8072-fcd5d70111ff
-  _TRIGGER_ID: 6f0ea908-2f26-4637-8072-fcd5d70111ff
-  _GCR_HOSTNAME: eu.gcr.io
+  _SERVICE_NAME: 'n8n'
+  _SERVICE_PORT: '5678'
+  _SERVICE_REGION: 'europe-west1'
+  _AR_HOSTNAME: 'europe-west1-docker.pkg.dev'
+
 tags:
   - gcp-cloud-build-deploy-cloud-run
   - gcp-cloud-build-deploy-cloud-run-managed
   - n8n
+
+# # Deploy using custom SA : @see annotations: serving.knative.dev/creator: "xxxx@PROJECT_ID.iam.gserviceaccount.com"
+# # If not specified : GCP use default cloudbuild SA: xxxxxxx@cloudbuild.gserviceaccount.com
+
+# serviceAccount: 'projects/$PROJECT_ID/serviceAccounts/$_SERVICE_ACCOUNT'
+
+# options:
+#   # Fix: build tries to store the logs in gcloud storage, insufficient the permissions.
+#   logging: CLOUD_LOGGING_ONLY
+#   automapSubstitutions: true
