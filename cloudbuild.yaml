@@ -43,7 +43,6 @@ substitutions:
   _SERVICE_NAME: 'n8n'
   _SERVICE_PORT: '5678'
   _SERVICE_REGION: 'europe-west1'
-  _AR_HOSTNAME: 'europe-west1-docker.pkg.dev'
 
 tags:
   - gcp-cloud-build-deploy-cloud-run
