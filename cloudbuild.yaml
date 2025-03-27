@@ -39,10 +39,11 @@ steps:
 images:
 - '$_AR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_SERVICE_NAME'
 
-substitutions:
-  _SERVICE_NAME: 'n8n'
-  _SERVICE_PORT: '5678'
-  _SERVICE_REGION: 'europe-west1'
+# Overrided by clourbuild trigger
+# substitutions:
+#   _SERVICE_NAME: 'n8n'
+#   _SERVICE_PORT: '5678'
+#   _SERVICE_REGION: 'europe-west1'
 
 tags:
   - gcp-cloud-build-deploy-cloud-run
@@ -52,7 +53,7 @@ tags:
 # # Deploy using custom SA : @see annotations: serving.knative.dev/creator: "xxxx@PROJECT_ID.iam.gserviceaccount.com"
 # # If not specified : GCP use default cloudbuild SA: xxxxxxx@cloudbuild.gserviceaccount.com
 
-# serviceAccount: 'projects/$PROJECT_ID/serviceAccounts/$_SERVICE_ACCOUNT'
+serviceAccount: 'projects/$PROJECT_ID/serviceAccounts/$_SERVICE_ACCOUNT'
 
 options:
   # Fix: build tries to store the logs in gcloud storage, insufficient the permissions.
