@@ -40,8 +40,9 @@ images:
 - '$_AR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_SERVICE_NAME'
 
 # Overrided by clourbuild trigger
-# substitutions:
-#   _SERVICE_NAME: 'n8n'
+substitutions:
+  _SERVICE_NAME: 'test'
+  _SERVICE_NAMO: 'test'
 #   _SERVICE_PORT: '5678'
 #   _SERVICE_REGION: 'europe-west1'
 
