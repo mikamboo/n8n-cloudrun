@@ -31,7 +31,7 @@ steps:
     '--min-instances', '0',
     '--max-instances', '1',
     '--allow-unauthenticated',
-    '--set-env-vars=DB_TYPE=postgresdb,N8N_PROTOCOL=https,NODE_ENV=production,N8N_LOG_LEVEL=debug',
+    '--set-env-vars=DB_TYPE=postgresdb,DB_POSTGRESDB_SSL_ENABLED=true,N8N_PROTOCOL=https,NODE_ENV=production,N8N_LOG_LEVEL=debug,N8N_DIAGNOSTICS_ENABLED=false',
     '--set-secrets=DB_POSTGRESDB_HOST=N8N_DB_POSTGRESDB_HOST:latest,DB_POSTGRESDB_DATABASE=N8N_DB_POSTGRESDB_DATABASE:latest,DB_POSTGRESDB_USER=N8N_POSTGRES_NON_ROOT_USER:latest,DB_POSTGRESDB_PASSWORD=N8N_POSTGRES_NON_ROOT_PASSWORD:latest,N8N_ENCRYPTION_KEY=N8N_ENCRYPTION_KEY:latest',
     '--labels=managed-by=gcp-cloud-build-deploy-cloud-run,commit-sha=$COMMIT_SHA,gcb-build-id=$BUILD_ID'
   ]
